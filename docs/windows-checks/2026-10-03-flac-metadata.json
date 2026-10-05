@@ -1,0 +1,14 @@
+{
+  "path": "C:\\Users\\mitoc\\song.mp3",
+  "extension": ".mp3",
+  "signature": "fLaC",
+  "size_bytes": 25973704,
+  "sample_rate_hz": 44100,
+  "channels": 2,
+  "bits_per_sample": 16,
+  "total_samples": 9345084,
+  "duration_seconds": 211.90666666666667,
+  "sha256": "d7bbcac06aa5f688ef77205fa47dd054a836ed3550dc4dd3117e69b5e317f63d",
+  "timeline_duration_seconds": 211.906667,
+  "duration_difference_seconds": -3.3333333249174757e-07
+}

@@ -1,5 +1,7 @@
 __pycache__/
 *.py[cod]
+.venv/
+.uv-cache/
 .DS_Store
 .build/
 dist/
@@ -15,6 +17,8 @@ dist/
 
 # Local audio input is embedded only in release packages.
 /media/
+/input/*
+!/input/.gitkeep
 *.mp3
 *.wav
 *.flac

@@ -1,0 +1,22 @@
+{
+  "python": "3.12.13 (main, May 10 2026, 19:35:37) [MSC v.1944 64 bit (AMD64)]",
+  "tests": 33,
+  "passed": 30,
+  "skipped": [
+    {
+      "test": "test_corrupt_resource_is_rejected (test_bundle.BundleTests.test_corrupt_resource_is_rejected)",
+      "reason": "macOS bundle not built; source tests run independently"
+    },
+    {
+      "test": "test_embedded_resources_match_source (test_bundle.BundleTests.test_embedded_resources_match_source)",
+      "reason": "macOS bundle not built; source tests run independently"
+    },
+    {
+      "test": "test_runs_from_an_empty_directory_and_cleans_up (test_bundle.BundleTests.test_runs_from_an_empty_directory_and_cleans_up)",
+      "reason": "macOS bundle not built; source tests run independently"
+    }
+  ],
+  "failures": [],
+  "errors": [],
+  "elapsed_seconds": 13.781000000002678
+}

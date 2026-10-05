@@ -5,7 +5,7 @@ export LANG=en_US.UTF-8
 export LC_CTYPE=en_US.UTF-8
 export PYTHONUTF8=1
 export PYTHONDONTWRITEBYTECODE=1
-if [[ ! -x "$MV_DIR/audio-clock" ]]; then
+if [[ ! -x "$MV_DIR/audio-clock" || "$MV_DIR/AudioClock.swift" -nt "$MV_DIR/audio-clock" ]]; then
     /bin/zsh "$MV_DIR/build-audio.sh"
 fi
 for MV_PYTHON in /Library/Frameworks/Python.framework/Versions/3.12/bin/python3 /opt/homebrew/bin/python3 /usr/bin/python3; do

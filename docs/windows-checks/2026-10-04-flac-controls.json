@@ -1,0 +1,47 @@
+{
+  "date": "2026-10-04",
+  "output": "null",
+  "cases": [
+    {
+      "target": 67.3,
+      "seek_recovery_seconds": 0.015999999988707714,
+      "paused_display_position": 67.3,
+      "paused_backend_position": 67.3,
+      "playing_backend_position": 67.400057,
+      "subtitle": "If I can make you happy",
+      "passed": true
+    },
+    {
+      "target": 124.2,
+      "seek_recovery_seconds": 0.0,
+      "paused_display_position": 124.2,
+      "paused_backend_position": 124.004941,
+      "playing_backend_position": 124.298734,
+      "subtitle": "Then maybe",
+      "passed": true
+    },
+    {
+      "target": 159.85,
+      "seek_recovery_seconds": 0.01600000000325963,
+      "paused_display_position": 159.85,
+      "paused_backend_position": 159.654485,
+      "playing_backend_position": 159.950007,
+      "subtitle": "TROIS",
+      "passed": true
+    },
+    {
+      "target": 183.2,
+      "seek_recovery_seconds": 0.0,
+      "paused_display_position": 183.2,
+      "paused_backend_position": 183.004501,
+      "playing_backend_position": 183.300005,
+      "subtitle": "Question me",
+      "passed": true
+    }
+  ],
+  "notes": [
+    "Paused seek display latches the exact target only after playback-restart; raw backend position is recorded separately. No audible or visual desktop acceptance is implied."
+  ],
+  "natural_end_passed": true,
+  "child_reaped": true
+}

@@ -1,10 +1,24 @@
 import Foundation
 import AVFoundation
 
+final class PlaybackDelegate: NSObject, AVAudioPlayerDelegate {
+    var ended = false
+    var error: String? = nil
+    func audioPlayerDidFinishPlaying(_ player: AVAudioPlayer, successfully flag: Bool) {
+        ended = flag
+        if !flag { error = "Audio playback failed" }
+    }
+    func audioPlayerDecodeErrorDidOccur(_ player: AVAudioPlayer, error: Error?) {
+        self.error = error?.localizedDescription ?? "Audio decode failed"
+    }
+}
+
 // The audio device owns the timeline. The terminal consumes currentTime.
 do {
     guard CommandLine.arguments.count > 1 else { throw NSError(domain: "Missing audio path", code: 1) }
     let player = try AVAudioPlayer(contentsOf: URL(fileURLWithPath: CommandLine.arguments[1]))
+    let playback = PlaybackDelegate()
+    player.delegate = playback
     player.prepareToPlay()
     player.volume = 0.75
     var quitting = false
@@ -28,6 +42,7 @@ do {
                 case "seek":
                     if fields.count > 1, let t = Double(fields[1]) {
                         player.currentTime = min(max(0, t), max(0, player.duration - 0.01))
+                        playback.ended = false
                     }
                 case "volume":
                     if fields.count > 1, let v = Float(fields[1]) { player.volume = min(1, max(0, v)) }
@@ -39,9 +54,11 @@ do {
     }
     while !quitting {
         RunLoop.current.run(until: Date(timeIntervalSinceNow: 1.0 / 60.0))
-        let line = String(format: "{\"time\":%.6f,\"duration\":%.6f,\"playing\":%@}\n",
-                          player.currentTime, player.duration, player.isPlaying ? "true" : "false")
-        FileHandle.standardOutput.write(Data(line.utf8))
+        var state: [String: Any] = ["time": player.currentTime, "duration": player.duration,
+                                   "playing": player.isPlaying, "ended": playback.ended, "volume": player.volume]
+        if let message = playback.error { state = ["error": message] }
+        let data = try JSONSerialization.data(withJSONObject: state)
+        FileHandle.standardOutput.write(data + Data("\n".utf8))
     }
     input.readabilityHandler = nil
     player.stop()

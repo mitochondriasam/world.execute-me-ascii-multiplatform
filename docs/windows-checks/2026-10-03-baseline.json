@@ -1,0 +1,283 @@
+{
+  "date": "2026-10-03",
+  "timezone": "Asia/Singapore",
+  "baseline": "9d8e815281a104ccb648ec2f2df88cd9f0cb8c12",
+  "python": {
+    "version": "3.14.7 (tags/v3.14.7:823f032, Aug  5 2026, 10:51:32) [MSC v.1944 64 bit (AMD64)]",
+    "executable": "C:\\Users\\mitoc\\AppData\\Local\\Programs\\Python\\Python314\\python.exe",
+    "platform": "win32",
+    "machine": "AMD64",
+    "utf8_mode": 0,
+    "locale_encoding": "cp936",
+    "stdin_encoding": "gbk",
+    "stdout_encoding": "gbk",
+    "stderr_encoding": "gbk",
+    "stdin_isatty": false,
+    "stdout_isatty": false
+  },
+  "dependencies": {
+    "mpv_on_path": null,
+    "audio_present": false,
+    "macos_helper_present": false,
+    "bundle_present": false
+  },
+  "checks": [
+    {
+      "name": "python_launcher_3_12",
+      "command": [
+        "py",
+        "-3.12",
+        "--version"
+      ],
+      "cwd": "C:\\Users\\mitoc\\world.execute-me-ascii-multiplatform",
+      "exit_code": 112,
+      "stdout": "",
+      "stderr": "No installed Python found!\r\n"
+    },
+    {
+      "name": "help",
+      "command": [
+        "C:\\Users\\mitoc\\AppData\\Local\\Programs\\Python\\Python314\\python.exe",
+        "-B",
+        "C:\\Users\\mitoc\\world.execute-me-ascii-multiplatform\\player.py",
+        "--help"
+      ],
+      "cwd": "C:\\Users\\mitoc\\world.execute-me-ascii-multiplatform",
+      "exit_code": 1,
+      "stdout": "",
+      "stderr": "Traceback (most recent call last):\r\n  File \"C:\\Users\\mitoc\\world.execute-me-ascii-multiplatform\\player.py\", line 5, in <module>\r\n    import sys, termios, threading, time, tty, unicodedata\r\nModuleNotFoundError: No module named 'termios'\r\n"
+    },
+    {
+      "name": "snapshot_utf8_67.3",
+      "command": [
+        "C:\\Users\\mitoc\\AppData\\Local\\Programs\\Python\\Python314\\python.exe",
+        "-X",
+        "utf8",
+        "-B",
+        "C:\\Users\\mitoc\\world.execute-me-ascii-multiplatform\\player.py",
+        "--snapshot",
+        "67.3",
+        "--plain",
+        "--width",
+        "125",
+        "--height",
+        "45"
+      ],
+      "cwd": "C:\\Users\\mitoc\\AppData\\Local\\Temp\\windows-check-cab9o2yh",
+      "exit_code": 1,
+      "stdout": "",
+      "stderr": "Traceback (most recent call last):\r\n  File \"C:\\Users\\mitoc\\world.execute-me-ascii-multiplatform\\player.py\", line 5, in <module>\r\n    import sys, termios, threading, time, tty, unicodedata\r\nModuleNotFoundError: No module named 'termios'\r\n",
+      "expected_subtitle": "If I can make you happy"
+    },
+    {
+      "name": "snapshot_utf8_124.2",
+      "command": [
+        "C:\\Users\\mitoc\\AppData\\Local\\Programs\\Python\\Python314\\python.exe",
+        "-X",
+        "utf8",
+        "-B",
+        "C:\\Users\\mitoc\\world.execute-me-ascii-multiplatform\\player.py",
+        "--snapshot",
+        "124.2",
+        "--plain",
+        "--width",
+        "125",
+        "--height",
+        "45"
+      ],
+      "cwd": "C:\\Users\\mitoc\\AppData\\Local\\Temp\\windows-check-cab9o2yh",
+      "exit_code": 1,
+      "stdout": "",
+      "stderr": "Traceback (most recent call last):\r\n  File \"C:\\Users\\mitoc\\world.execute-me-ascii-multiplatform\\player.py\", line 5, in <module>\r\n    import sys, termios, threading, time, tty, unicodedata\r\nModuleNotFoundError: No module named 'termios'\r\n",
+      "expected_subtitle": "Then maybe"
+    },
+    {
+      "name": "snapshot_utf8_159.85",
+      "command": [
+        "C:\\Users\\mitoc\\AppData\\Local\\Programs\\Python\\Python314\\python.exe",
+        "-X",
+        "utf8",
+        "-B",
+        "C:\\Users\\mitoc\\world.execute-me-ascii-multiplatform\\player.py",
+        "--snapshot",
+        "159.85",
+        "--plain",
+        "--width",
+        "125",
+        "--height",
+        "45"
+      ],
+      "cwd": "C:\\Users\\mitoc\\AppData\\Local\\Temp\\windows-check-cab9o2yh",
+      "exit_code": 1,
+      "stdout": "",
+      "stderr": "Traceback (most recent call last):\r\n  File \"C:\\Users\\mitoc\\world.execute-me-ascii-multiplatform\\player.py\", line 5, in <module>\r\n    import sys, termios, threading, time, tty, unicodedata\r\nModuleNotFoundError: No module named 'termios'\r\n",
+      "expected_subtitle": "TROIS"
+    },
+    {
+      "name": "snapshot_utf8_183.2",
+      "command": [
+        "C:\\Users\\mitoc\\AppData\\Local\\Programs\\Python\\Python314\\python.exe",
+        "-X",
+        "utf8",
+        "-B",
+        "C:\\Users\\mitoc\\world.execute-me-ascii-multiplatform\\player.py",
+        "--snapshot",
+        "183.2",
+        "--plain",
+        "--width",
+        "125",
+        "--height",
+        "45"
+      ],
+      "cwd": "C:\\Users\\mitoc\\AppData\\Local\\Temp\\windows-check-cab9o2yh",
+      "exit_code": 1,
+      "stdout": "",
+      "stderr": "Traceback (most recent call last):\r\n  File \"C:\\Users\\mitoc\\world.execute-me-ascii-multiplatform\\player.py\", line 5, in <module>\r\n    import sys, termios, threading, time, tty, unicodedata\r\nModuleNotFoundError: No module named 'termios'\r\n",
+      "expected_subtitle": "Question me"
+    },
+    {
+      "name": "snapshot_default_encoding",
+      "command": [
+        "C:\\Users\\mitoc\\AppData\\Local\\Programs\\Python\\Python314\\python.exe",
+        "-B",
+        "C:\\Users\\mitoc\\world.execute-me-ascii-multiplatform\\player.py",
+        "--snapshot",
+        "159.85",
+        "--plain",
+        "--width",
+        "125",
+        "--height",
+        "45"
+      ],
+      "cwd": "C:\\Users\\mitoc\\AppData\\Local\\Temp\\windows-check-cab9o2yh",
+      "exit_code": 1,
+      "stdout": "",
+      "stderr": "Traceback (most recent call last):\r\n  File \"C:\\Users\\mitoc\\world.execute-me-ascii-multiplatform\\player.py\", line 5, in <module>\r\n    import sys, termios, threading, time, tty, unicodedata\r\nModuleNotFoundError: No module named 'termios'\r\n"
+    },
+    {
+      "name": "resource_config.json_default",
+      "status": "pass",
+      "result_type": "dict"
+    },
+    {
+      "name": "resource_config.json_utf-8",
+      "status": "pass",
+      "result_type": "dict"
+    },
+    {
+      "name": "resource_lyrics.json_default",
+      "status": "fail",
+      "error": "UnicodeDecodeError: 'gbk' codec can't decode byte 0x80 in position 80: illegal multibyte sequence"
+    },
+    {
+      "name": "resource_lyrics.json_utf-8",
+      "status": "pass",
+      "result_type": "list"
+    },
+    {
+      "name": "resource_spectrum.json_default",
+      "status": "pass",
+      "result_type": "dict"
+    },
+    {
+      "name": "resource_spectrum.json_utf-8",
+      "status": "pass",
+      "result_type": "dict"
+    },
+    {
+      "name": "syntax_player.py",
+      "status": "pass"
+    },
+    {
+      "name": "syntax_scenes.py",
+      "status": "pass"
+    },
+    {
+      "name": "syntax_tools/build_bundle.py",
+      "status": "pass"
+    },
+    {
+      "name": "syntax_tools/bundle_main.py",
+      "status": "pass"
+    },
+    {
+      "name": "syntax_tests/test_bundle.py",
+      "status": "pass"
+    },
+    {
+      "name": "default_unittest_discovery",
+      "command": [
+        "C:\\Users\\mitoc\\AppData\\Local\\Programs\\Python\\Python314\\python.exe",
+        "-B",
+        "-m",
+        "unittest",
+        "discover",
+        "-v"
+      ],
+      "cwd": "C:\\Users\\mitoc\\world.execute-me-ascii-multiplatform",
+      "exit_code": 5,
+      "stdout": "",
+      "stderr": "\r\n----------------------------------------------------------------------\r\nRan 0 tests in 0.000s\r\n\r\nNO TESTS RAN\r\n"
+    },
+    {
+      "name": "gbk_unencodable_source_literals",
+      "status": "diagnostic",
+      "characters": {
+        "player.py": [],
+        "scenes.py": [
+          "▐",
+          "░",
+          "▒",
+          "▶",
+          "▷",
+          "◉",
+          "◯",
+          "♥",
+          "⚥"
+        ]
+      },
+      "note": "Static source strings only; this is not a successfully rendered frame."
+    },
+    {
+      "name": "explicit_tests_directory_discovery",
+      "status": "diagnostic",
+      "test_count": 3,
+      "executed": false,
+      "reason": "All discovered tests require the absent built bundle."
+    }
+  ],
+  "windows": {
+    "os_version": "10.0.26300",
+    "build": "26300.9550",
+    "display_version": "26H2",
+    "architecture": "X64",
+    "registry_product_name": "Windows 10 Pro",
+    "edition": "Professional",
+    "marketing_name_verified": false
+  },
+  "shell": {
+    "powershell": "7.6.5",
+    "git": "2.55.0.windows.3",
+    "term": "dumb",
+    "wt_session_present": false,
+    "windows_terminal_version": null
+  },
+  "terminal_handles": {
+    "stdin": {
+      "console_mode_available": false,
+      "mode": null,
+      "win32_error": 6
+    },
+    "stdout": {
+      "console_mode_available": false,
+      "mode": null,
+      "win32_error": 6
+    }
+  },
+  "limitations": [
+    "Win32_OperatingSystem and Win32_SoundDevice CIM queries returned Access denied.",
+    "wt.exe resolves to an app execution alias; installed version and current terminal are not verified.",
+    "No real audio output, interactive key input or visual synchronization acceptance was performed.",
+    "mpv lookup covered PATH and App Paths registry entries; absence elsewhere was not established."
+  ]
+}

@@ -1,0 +1,8 @@
+{
+  "date": "2026-10-04",
+  "launcher": "run.cmd",
+  "working_directory_independence": true,
+  "help_exit_code": 0,
+  "stdout_utf8": true,
+  "cache_mode": "UV_NO_CACHE=1"
+}
