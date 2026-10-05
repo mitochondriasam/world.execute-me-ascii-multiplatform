@@ -1,0 +1,25 @@
+{
+  "date": "2026-10-04",
+  "python": "3.12.13",
+  "platform": "win32",
+  "command": "uv run --locked python -X utf8 -B -m unittest discover -s tests -v",
+  "tests_run": 25,
+  "passed": 22,
+  "skipped": [
+    {
+      "test": "test_bundle.BundleTests.test_corrupt_resource_is_rejected",
+      "reason": "macOS bundle not built; source tests run independently"
+    },
+    {
+      "test": "test_bundle.BundleTests.test_embedded_resources_match_source",
+      "reason": "macOS bundle not built; source tests run independently"
+    },
+    {
+      "test": "test_bundle.BundleTests.test_runs_from_an_empty_directory_and_cleans_up",
+      "reason": "macOS bundle not built; source tests run independently"
+    }
+  ],
+  "failures": [],
+  "errors": [],
+  "successful": true
+}

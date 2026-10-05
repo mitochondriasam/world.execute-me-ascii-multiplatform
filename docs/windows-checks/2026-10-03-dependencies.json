@@ -1,0 +1,56 @@
+{
+  "date": "2026-10-03",
+  "uv_version": "0.11.15",
+  "python": "3.12.13 (main, May 10 2026, 19:35:37) [MSC v.1944 64 bit (AMD64)]",
+  "python_executable": "C:\\Users\\mitoc\\world.execute-me-ascii-multiplatform\\.venv\\Scripts\\python.exe",
+  "winget_version": "1.29.380",
+  "winget_package": "shinchiro.mpv",
+  "winget_package_version": "0.41.0",
+  "mpv_executable": "C:\\Program Files\\MPV Player\\mpv.com",
+  "audio_file": "C:/Users/mitoc/song.mp3",
+  "checks": [
+    {
+      "name": "mpv_version",
+      "command": [
+        "C:\\Program Files\\MPV Player\\mpv.com",
+        "--version"
+      ],
+      "exit_code": 0,
+      "stdout": "mpv v0.41.0-244-gaf9c81fa1 Copyright © 2000-2026 mpv/MPlayer/mplayer2 projects\r\n built on Mar  2 2026 00:06:26\r\nlibplacebo version: v7.360.0 (v7.360.0-6-g905358e-dirty)\r\nFFmpeg version: N-123099-g862338fe3\r\nFFmpeg library versions:\r\n   libavcodec      62.24.100\r\n   libavdevice     62.2.100\r\n   libavfilter     11.12.100\r\n   libavformat     62.10.101\r\n   libavutil       60.25.100\r\n   libswresample   6.2.100\r\n   libswscale      9.4.100\r\n",
+      "stderr": ""
+    },
+    {
+      "name": "flac_decode_null_output",
+      "command": [
+        "C:\\Program Files\\MPV Player\\mpv.com",
+        "--no-config",
+        "--no-video",
+        "--no-audio-display",
+        "--ao=null",
+        "--length=0.2",
+        "--",
+        "C:/Users/mitoc/song.mp3"
+      ],
+      "exit_code": 0,
+      "stdout": "○ Image  --vid=1  (mjpeg [Baseline] 800x800)\r\n● Audio  --aid=1  (flac 2ch 44100 Hz)\r\nFile tags:\r\n Artist: Mili\r\n Album: Miracle Milk\r\n Title: world.execute (me) ;\r\n Track: 11\r\nAO: [null] 44100Hz stereo 2ch s16\r\nExiting... (End of file)\r\n",
+      "stderr": ""
+    },
+    {
+      "name": "python_3_12_help",
+      "command": [
+        "C:\\Users\\mitoc\\world.execute-me-ascii-multiplatform\\.venv\\Scripts\\python.exe",
+        "-B",
+        "C:\\Users\\mitoc\\world.execute-me-ascii-multiplatform\\player.py",
+        "--help"
+      ],
+      "exit_code": 1,
+      "stdout": "",
+      "stderr": "Traceback (most recent call last):\r\n  File \"C:\\Users\\mitoc\\world.execute-me-ascii-multiplatform\\player.py\", line 5, in <module>\r\n    import sys, termios, threading, time, tty, unicodedata\r\nModuleNotFoundError: No module named 'termios'\r\n"
+    }
+  ],
+  "limitations": [
+    "FLAC decoding used null audio output and only the first 0.2 seconds; real sound, full-file integrity, IPC controls and timeline synchronization remain unverified.",
+    "Current player still fails its termios import; uv configuration does not implement Windows playback.",
+    "mpv was verified by absolute path; the current process PATH has not been refreshed."
+  ]
+}

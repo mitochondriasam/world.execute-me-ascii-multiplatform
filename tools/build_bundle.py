@@ -8,13 +8,17 @@ import zipapp
 import zipfile
 
 ROOT = Path(__file__).resolve().parents[1]
+AUDIO_PATH = json.loads((ROOT/'config.json').read_text(encoding='utf-8'))['audio']
 FILES = ('player.py', 'scenes.py', 'audio-clock', 'config.json', 'lyrics.json',
-         'spectrum.json', 'media/song.mp3')
+         'spectrum.json', AUDIO_PATH) + tuple(
+    path.relative_to(ROOT).as_posix()
+    for directory in ('audio_backends', 'terminal_backends')
+    for path in sorted((ROOT/directory).glob('*.py')))
 
 
 def main():
-    if not (ROOT/'media/song.mp3').is_file():
-        raise SystemExit('请先将本地音频放入 media/song.mp3；音频不会提交到仓库。')
+    if not (ROOT/AUDIO_PATH).is_file():
+        raise SystemExit(f'请先将本地媒体放入 {AUDIO_PATH}；媒体不会提交到仓库。')
     subprocess.run(['/bin/zsh', str(ROOT/'build-audio.sh'), '--universal'], check=True)
     output = ROOT/'dist'
     output.mkdir(exist_ok=True)

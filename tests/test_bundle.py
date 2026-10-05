@@ -13,17 +13,20 @@ ROOT = Path(__file__).resolve().parents[1]
 BUNDLE = ROOT/'dist/world-execute-mv.pyz'
 
 
+@unittest.skipUnless(BUNDLE.is_file(), 'macOS bundle not built; source tests run independently')
 class BundleTests(unittest.TestCase):
     def test_embedded_resources_match_source(self):
         with zipfile.ZipFile(BUNDLE) as archive:
             manifest = json.loads(archive.read('bundle-manifest.json'))
-            self.assertIn('media/song.mp3', manifest['files'])
+            source_config = json.loads((ROOT/'config.json').read_text(encoding='utf-8'))
+            self.assertIn(source_config['audio'], manifest['files'])
             for name, digest in manifest['files'].items():
                 self.assertEqual(hashlib.sha256(archive.read(name)).hexdigest(), digest)
                 self.assertEqual(archive.read(name), (ROOT/name).read_bytes())
             config = json.loads(archive.read('config.json'))
-            self.assertEqual(config['audio'], 'media/song.mp3')
-            self.assertFalse(any(name.lower().endswith(('.mp4', '.png', '.jpg')) for name in archive.namelist()))
+            self.assertEqual(config['audio'], source_config['audio'])
+            self.assertFalse(any(name.lower().endswith(('.mp4', '.png', '.jpg'))
+                                 for name in archive.namelist() if name != config['audio']))
 
     def test_runs_from_an_empty_directory_and_cleans_up(self):
         with tempfile.TemporaryDirectory() as folder:

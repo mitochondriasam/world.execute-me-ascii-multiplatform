@@ -1,0 +1,71 @@
+{
+  "backend": "windows-native",
+  "external_processes_allowed": false,
+  "muted": true,
+  "initialization_seconds": 0.28100000000267755,
+  "pcm": {
+    "frames": 9345084,
+    "rate": 44100,
+    "channels": 2,
+    "bits": 16
+  },
+  "seeks": [
+    {
+      "target": 67.3,
+      "position": 67.3,
+      "backend_position": 67.3,
+      "seek_seconds": 0.0
+    },
+    {
+      "target": 124.2,
+      "position": 124.2,
+      "backend_position": 124.2,
+      "seek_seconds": 0.0
+    },
+    {
+      "target": 159.85,
+      "position": 159.85,
+      "backend_position": 159.85,
+      "seek_seconds": 0.01600000000325963
+    },
+    {
+      "target": 183.2,
+      "position": 183.2,
+      "backend_position": 183.2,
+      "seek_seconds": 0.0
+    },
+    {
+      "target": 211.8,
+      "position": 211.8,
+      "backend_position": 211.8,
+      "seek_seconds": 0.015999999988707714
+    }
+  ],
+  "ending": {
+    "position": 211.90666666666667,
+    "backend_position": 211.9095417,
+    "duration": 211.90666666666667,
+    "paused": true,
+    "buffering": false,
+    "seeking": false,
+    "ended": true,
+    "volume": 0.0,
+    "updated_at": 103159.593,
+    "connected_at": 103159.593
+  },
+  "replay": {
+    "position": 0.335625,
+    "backend_position": 0.335625,
+    "duration": 211.90666666666667,
+    "paused": false,
+    "buffering": false,
+    "seeking": false,
+    "ended": false,
+    "volume": 0.0,
+    "updated_at": 103159.937,
+    "connected_at": 103159.937
+  },
+  "temporary_files_removed": true,
+  "original_sha256_before": "d7bbcac06aa5f688ef77205fa47dd054a836ed3550dc4dd3117e69b5e317f63d",
+  "original_sha256_after": "d7bbcac06aa5f688ef77205fa47dd054a836ed3550dc4dd3117e69b5e317f63d"
+}

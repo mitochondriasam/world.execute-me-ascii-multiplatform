@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
-"""A terminal music video. Python standard library + macOS AVFoundation."""
+"""A terminal music video. Python standard library with platform audio and terminal backends."""
 from __future__ import annotations
-import argparse, bisect, json, math, os, select, shutil, signal, subprocess
-import sys, termios, threading, time, tty, unicodedata
+import argparse, bisect, json, math, signal
+import sys, time, unicodedata
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent
@@ -112,10 +112,10 @@ CHAPTERS=[(0,'01 / CREATION','创建'),(29.709,'02 / DEVOTION','献出自我'),
 
 class Film:
     def __init__(self):
-        self.lyrics=json.loads((ROOT/'lyrics.json').read_text())
+        self.lyrics=json.loads((ROOT/'lyrics.json').read_text(encoding='utf-8'))
         self.times=[x['time'] for x in self.lyrics]
-        self.spectrum=json.loads((ROOT/'spectrum.json').read_text())
-        self.config=json.loads((ROOT/'config.json').read_text())
+        self.spectrum=json.loads((ROOT/'spectrum.json').read_text(encoding='utf-8'))
+        self.config=json.loads((ROOT/'config.json').read_text(encoding='utf-8'))
     def cue(self,t):
         idx=bisect.bisect_right(self.times,t)-1
         e=self.lyrics[idx] if idx>=0 else None
@@ -194,127 +194,178 @@ class Film:
         c.box(x,y,w,len(lines)+3,BRIGHT)
         for i,s in enumerate(lines):c.put(x+3,y+2+i,s,WHITE if i==0 else NORMAL)
 
-class Audio:
-    def __init__(self,path):
-        self.state={'time':0.,'duration':0.,'playing':False}
-        self.last=time.monotonic(); self.error=''
-        self.proc=subprocess.Popen([str(ROOT/'audio-clock'),str(path)],stdin=subprocess.PIPE,stdout=subprocess.PIPE,stderr=subprocess.PIPE,text=True,bufsize=1)
-        threading.Thread(target=self.read,daemon=True).start()
-        deadline=time.monotonic()+8
-        while not self.state['duration']:
-            if self.proc.poll() is not None:raise RuntimeError(self.proc.stderr.read() or '音频引擎退出')
-            if time.monotonic()>deadline:raise RuntimeError('音频引擎没有响应')
-            time.sleep(.01)
-    def read(self):
-        for line in self.proc.stdout:
-            try:
-                message=json.loads(line)
-                if 'error' in message:self.error=message['error']
-                else:self.state=message;self.last=time.monotonic()
-            except ValueError:pass
-    def command(self,s):
-        self.proc.stdin.write(s+'\n');self.proc.stdin.flush()
-    def close(self):
-        if self.proc.poll() is None:
-            try:self.command('quit');self.proc.wait(timeout=2)
-            except (BrokenPipeError,subprocess.TimeoutExpired):self.proc.terminate()
+def run(args, film):
+    from contextlib import ExitStack
+    from dataclasses import asdict
+    from audio_backends import create_audio
+    from terminal_backends import create_terminal
 
-def run(args,film):
-    if not sys.stdin.isatty():raise RuntimeError('请在 macOS 终端中运行。')
-    # Write to the controlling terminal even when a command wrapper pipes stdout.
-    terminal_fd=os.open('/dev/tty',os.O_RDWR)
-    sys.stdout=os.fdopen(os.dup(terminal_fd),'w',encoding='utf-8',buffering=1)
-    os.close(terminal_fd)
-    audio_path=Path(args.audio).expanduser().resolve() if args.audio else Path(film.config['audio'])
-    if not args.audio and not audio_path.is_absolute():audio_path=ROOT/audio_path
-    if not audio_path.is_file():raise RuntimeError(f'找不到音频：{audio_path}\n请使用 --audio 指定 MP3 文件。')
-    audio=Audio(audio_path)
-    original=termios.tcgetattr(sys.stdin.fileno())
-    offset=args.offset if args.offset is not None else film.config.get('subtitle_offset',0.)
-    started=args.autoplay or args.paused; paused=not args.autoplay; help_on=False; volume=.75; ready=not started
-    current=args.start; playing_seen=False; frames=0; max_render=0.; size_last=None; report=[]
-    def quit_signal(*_):raise KeyboardInterrupt
-    old_signals={s:signal.signal(s,quit_signal) for s in (signal.SIGTERM,signal.SIGHUP)}
+    audio_path = Path(args.audio).expanduser().resolve() if args.audio else ROOT/film.config['audio']
+    if not audio_path.is_file():
+        raise RuntimeError(f'找不到媒体文件：{audio_path}\n请将媒体文件放到此路径，或使用 --audio 指定其他文件。')
+    offset = args.offset if args.offset is not None else film.config.get('subtitle_offset', 0.)
+    started = args.autoplay or args.paused
+    ready = not started
+    help_on = False
+    frames = 0
+    max_render = 0.
+    current = args.start
+    samples = []
+    seeks = []
+    size_last = None
+    backend_name = ''
+    failure = None
+    cleanup_errors = []
+    exit_reason = 'quit'
+    last_state = None
+
+    def quit_signal(*_):
+        raise KeyboardInterrupt
+
     try:
-        tty.setcbreak(sys.stdin.fileno())
-        sys.stdout.write('\x1b[?1049h\x1b[?25l\x1b[?7l\x1b[2J');sys.stdout.flush()
-        audio.command(f'seek {args.start}')
-        if args.autoplay:audio.command('play')
-        keybuf=''; next_frame=time.monotonic()
-        while True:
-            begin=time.monotonic()
-            state=audio.state.copy();current=state['time']
-            if audio.error:raise RuntimeError('音频输出不可用，请检查 macOS 声音输出设备。')
-            if audio.proc.poll() is not None:raise RuntimeError('音频引擎意外退出。')
-            if begin-audio.last>2:raise RuntimeError('音频时钟停止更新。')
-            if state['playing']:playing_seen=True
-            if playing_seen and not state['playing'] and not paused and current<.05:
-                current=state['duration'];paused=True
-                audio.command(f'seek {state["duration"]-.02}')
-            if current>=state['duration']-.05 and not state['playing'] and started:paused=True
-            # Read the PTY itself. Shell COLUMNS/LINES can be stale after fullscreen.
-            try:w,h=os.get_terminal_size(sys.stdin.fileno())
-            except OSError:w,h=100,36
-            w=min(w,240);h=min(h,85)
-            # Leave the last column unused. This avoids terminal autowrap artifacts.
-            c=film.render(current,w-1,h,paused,offset,help_on,ready)
-            if (w,h)!=size_last:sys.stdout.write('\x1b[2J');size_last=(w,h)
-            sys.stdout.write(c.ansi());sys.stdout.flush()
-            frames+=1;max_render=max(max_render,time.monotonic()-begin)
-            if frames%30==0:report.append({'audio_time':current,'playing':state['playing'],'width':w,'height':h,'frames':frames})
-            if args.stop_after is not None and current>=args.stop_after:break
-            next_frame+=1/args.fps
-            delay=max(0,next_frame-time.monotonic())
-            if delay==0:next_frame=time.monotonic()
-            if select.select([sys.stdin],[],[],delay)[0]:
-                keybuf+=os.read(sys.stdin.fileno(),128).decode('utf-8',errors='ignore')
-                if keybuf=='\x1b':
-                    if select.select([sys.stdin],[],[],.035)[0]:keybuf+=os.read(sys.stdin.fileno(),32).decode(errors='ignore')
-                while keybuf:
-                    if keybuf.startswith(('\x1b[C','\x1b[D')):
-                        right=keybuf[2]=='C';keybuf=keybuf[3:]
-                        audio.command(f'seek {min(state["duration"]-.05,max(0,current+(5 if right else -5)))}')
-                    else:
-                        key=keybuf[0];keybuf=keybuf[1:]
-                        if key in ('q','Q','\x1b','\x03'):return
-                        if key in (' ','\r','\n'):
-                            if not started:started=True;ready=False;paused=False;audio.command('play')
-                            else:paused=not paused;audio.command('pause' if paused else 'play')
-                        elif key in ('r','R'):
-                            audio.command('seek 0');audio.command('play');started=True;ready=False;paused=False
-                        elif key in '12345':
-                            audio.command(f'seek {CHAPTERS[int(key)-1][0]}');audio.command('play');started=True;ready=False;paused=False
-                        elif key=='[':offset=round(offset+.1,2)
-                        elif key==']':offset=round(offset-.1,2)
-                        elif key in ',.':
-                            i=bisect.bisect_right(film.times,current+.03)-1
-                            i=min(len(film.times)-1,max(0,i+(1 if key=='.' else -1)))
-                            audio.command(f'seek {film.times[i]}');started=True;ready=False
-                        elif key in 'hH':help_on=not help_on
-                        elif key in '+=':volume=min(1,volume+.05);audio.command(f'volume {volume}')
-                        elif key=='-':volume=max(0,volume-.05);audio.command(f'volume {volume}')
+        with ExitStack() as resources:
+            terminal = resources.enter_context(create_terminal(headless=args.headless,
+                                                               width=args.width, height=args.height))
+            for name in ('SIGTERM', 'SIGHUP'):
+                sig = getattr(signal, name, None)
+                if sig is not None:
+                    original = signal.signal(sig, quit_signal)
+                    resources.callback(signal.signal, sig, original)
+            audio = create_audio(audio_path, backend=args.backend, mpv=args.mpv, output=args.audio_output)
+            def close_audio():
+                try:
+                    audio.close()
+                except Exception as exc:
+                    cleanup_errors.append(str(exc))
+                    print(f'音频清理失败：{exc}', file=sys.stderr)
+            resources.callback(close_audio)
+            backend_name = audio.name
+
+            def seek(target):
+                audio.seek(target)
+                seeks.append({'target': audio.last_seek_target,
+                              'recovery_seconds': audio.last_seek_seconds})
+
+            seek(args.start)
+            if args.autoplay:
+                audio.play()
+            next_frame = time.monotonic()
+            while True:
+                state = audio.poll()
+                last_state = state
+                current = state.position
+                begin = time.monotonic()
+                w, h = terminal.size()
+                w, h = min(w, 240), min(h, 85)
+                canvas = film.render(current, max(1, w-1), max(1, h), state.paused,
+                                     offset, help_on, ready)
+                terminal.draw(canvas, clear=(w, h) != size_last)
+                size_last = (w, h)
+                frames += 1
+                max_render = max(max_render, time.monotonic()-begin)
+                if frames == 1 or frames % 30 == 0 or state.ended:
+                    samples.append({'audio_time': current, 'playing': not state.paused,
+                                    'backend_position': state.backend_position,
+                                    'buffering': state.buffering, 'ended': state.ended,
+                                    'backend_updated_at': state.updated_at,
+                                    'backend_connected_at': state.connected_at,
+                                    'width': w, 'height': h, 'frames': frames})
+                if args.stop_after is not None and current >= args.stop_after:
+                    exit_reason = 'stop-after'
+                    break
+                if args.headless and started and state.ended:
+                    exit_reason = 'ended'
+                    break
+                next_frame += 1/args.fps
+                delay = max(0., next_frame-time.monotonic())
+                if not delay:
+                    next_frame = time.monotonic()
+                for key in terminal.read_events(delay):
+                    if key == 'QUIT':
+                        return
+                    if key in ('SPACE', 'ENTER'):
+                        if not started or state.paused or state.ended:
+                            audio.play()
+                        else:
+                            audio.pause()
+                        started, ready = True, False
+                    elif key in ('LEFT', 'RIGHT'):
+                        seek(current+(5 if key == 'RIGHT' else -5))
+                    elif key == 'R':
+                        seek(0)
+                        audio.play()
+                        started, ready = True, False
+                    elif key in ('1', '2', '3', '4', '5'):
+                        seek(CHAPTERS[int(key)-1][0])
+                        audio.play()
+                        started, ready = True, False
+                    elif key == '[':
+                        offset = round(offset+.1, 2)
+                    elif key == ']':
+                        offset = round(offset-.1, 2)
+                    elif key in (',', '.'):
+                        index = bisect.bisect_right(film.times, current+.03)-1
+                        index = min(len(film.times)-1, max(0, index+(1 if key == '.' else -1)))
+                        seek(film.times[index])
+                        started, ready = True, False
+                    elif key == 'H':
+                        help_on = not help_on
+                    elif key in ('+', '-'):
+                        audio.set_volume(state.volume+(.05 if key == '+' else -.05))
+                    state = audio.poll()
+                    current = state.position
+        if cleanup_errors:
+            raise RuntimeError('音频清理失败：'+'; '.join(cleanup_errors))
+    except BaseException as exc:
+        failure = exc
+        exit_reason = 'interrupted' if isinstance(exc, KeyboardInterrupt) else 'error'
+        raise
     finally:
-        audio.close()
-        termios.tcsetattr(sys.stdin.fileno(),termios.TCSADRAIN,original)
-        sys.stdout.write('\x1b[0m\x1b[?7h\x1b[?25h\x1b[?1049l');sys.stdout.flush()
-        for s,handler in old_signals.items():signal.signal(s,handler)
         if args.report:
-            Path(args.report).write_text(json.dumps({'frames':frames,'last_time':current,'max_frame_render_seconds':max_render,'samples':report},indent=2))
+            report = {'frames': frames, 'last_time': current, 'max_frame_render_seconds': max_render,
+                      'backend': backend_name, 'headless': args.headless,
+                      'audio_output': args.audio_output, 'exit_reason': exit_reason,
+                      'error': str(failure) if failure else None,
+                      'cleanup_errors': cleanup_errors,
+                      'state': asdict(last_state) if last_state else None,
+                      'seeks': seeks, 'samples': samples}
+            try:
+                Path(args.report).write_text(json.dumps(report, ensure_ascii=False, indent=2)+'\n',
+                                            encoding='utf-8')
+            except OSError as exc:
+                if failure:
+                    print(f'无法写入播放报告：{exc}', file=sys.stderr)
+                else:
+                    raise
 
 def main():
+    for stream in (sys.stdout,sys.stderr):
+        if hasattr(stream,'reconfigure'):stream.reconfigure(encoding='utf-8')
     p=argparse.ArgumentParser(description='world.execute(me); / bilingual terminal MV')
     p.add_argument('--audio');p.add_argument('--start',type=float,default=0.)
+    p.add_argument('--backend', choices=('auto','windows-native','mpv','avfoundation'), default='auto')
+    p.add_argument('--mpv', help='mpv executable path (also MPV_PATH)')
+    p.add_argument('--headless', action='store_true', help='render without interactive terminal')
+    p.add_argument('--audio-output', choices=('auto','null'), default='auto', help='null is for automated tests')
     p.add_argument('--autoplay',action='store_true');p.add_argument('--fps',type=int,default=24)
     p.add_argument('--paused',action='store_true')
     p.add_argument('--offset',type=float);p.add_argument('--snapshot',type=float)
     p.add_argument('--width',type=int,default=120);p.add_argument('--height',type=int,default=40)
     p.add_argument('--plain',action='store_true');p.add_argument('--report');p.add_argument('--stop-after',type=float)
-    a=p.parse_args();film=Film()
+    a=p.parse_args()
     if not 5<=a.fps<=60:p.error('--fps must be between 5 and 60')
-    if a.snapshot is not None:
-        c=film.render(a.snapshot,a.width,a.height,True)
-        print(c.plain() if a.plain else c.ansi());return
-    try:run(a,film)
+    if a.width < 1 or a.height < 1:p.error('--width and --height must be positive')
+    for name in ('start', 'snapshot', 'offset', 'stop_after'):
+        value=getattr(a,name)
+        if value is not None and not math.isfinite(value):p.error(f'--{name.replace("_","-")} must be finite')
+    if a.start < 0:p.error('--start must be nonnegative')
+    if a.headless and not a.autoplay:p.error('--headless requires --autoplay')
+    try:
+        film=Film()
+        if a.snapshot is not None:
+            c=film.render(a.snapshot,a.width,a.height,True)
+            print(c.plain() if a.plain else c.ansi());return
+        run(a,film)
     except KeyboardInterrupt:pass
     except Exception as e:print(f'播放失败：{e}',file=sys.stderr);sys.exit(1)
 

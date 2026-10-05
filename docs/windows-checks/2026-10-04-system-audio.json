@@ -1,0 +1,19 @@
+{
+  "date": "2026-10-04",
+  "output": "auto",
+  "audibility_confirmed": false,
+  "note": "A short playback through the system audio backend verifies initialization and reported position only; no human listening or desktop synchronization assessment was performed.",
+  "passed": true,
+  "current_audio_output": "wasapi",
+  "position": 0.980321,
+  "duration": 211.906667,
+  "audio_params": {
+    "samplerate": 48000,
+    "channel-count": 2,
+    "channels": "stereo",
+    "hr-channels": "stereo",
+    "format": "float"
+  },
+  "audio_device": "auto",
+  "child_reaped": true
+}
